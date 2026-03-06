@@ -2,10 +2,17 @@
 /**
  * SlideDown — Markdown to Beautiful PPTX Converter
  * 
- * Usage: node md2pptx.js input.md output.pptx [theme]
+ * Usage:
+ *   node md2pptx.js input.md output.pptx [theme]
+ *   node md2pptx.js input.md output.pptx --theme-file brand.json
+ *   node md2pptx.js --list-themes
  * 
- * Themes: midnight, aurora, sunset, minimal, forest, brutalist
- * Default: midnight
+ * Built-in: midnight, aurora, sunset, minimal, forest, brutalist,
+ *           corporate, rose, ocean, terracotta, lavender, noir,
+ *           neon, paper, cherry, sage
+ * 
+ * Custom:   --theme-file path/to/theme.json
+ * Extract:  node extract-theme.js company.pptx > brand.json
  */
 
 const pptxgen = require("pptxgenjs");
@@ -15,8 +22,13 @@ const path = require("path");
 // ─── THEME DEFINITIONS ────────────────────────────────────────────
 
 const THEMES = {
+
+  // ── DARK THEMES ────────────────────────────────────────────────
+
   midnight: {
     name: "Midnight",
+    category: "dark",
+    description: "Dark navy + indigo. Professional, modern.",
     bg: "1E2761",
     bgAlt: "283572",
     text: "E8ECF1",
@@ -32,6 +44,8 @@ const THEMES = {
   },
   aurora: {
     name: "Aurora",
+    category: "dark",
+    description: "Purple-teal gradient. Creative, bold.",
     bg: "0F0B2E",
     bgAlt: "1E1B4B",
     text: "E0E7FF",
@@ -47,6 +61,8 @@ const THEMES = {
   },
   sunset: {
     name: "Sunset",
+    category: "dark",
+    description: "Warm orange-amber. Energetic, startup-friendly.",
     bg: "7C2D12",
     bgAlt: "9A3412",
     text: "FFFBEB",
@@ -60,23 +76,10 @@ const THEMES = {
     headingFont: "Trebuchet MS",
     bodyFont: "Calibri",
   },
-  minimal: {
-    name: "Minimal",
-    bg: "FAFAFA",
-    bgAlt: "F3F4F6",
-    text: "1A1A1A",
-    heading: "111827",
-    accent: "2563EB",
-    accent2: "3B82F6",
-    muted: "6B7280",
-    tableBg: "F9FAFB",
-    tableAlt: "F3F4F6",
-    codeBg: "1F2937",
-    headingFont: "Cambria",
-    bodyFont: "Calibri Light",
-  },
   forest: {
     name: "Forest",
+    category: "dark",
+    description: "Deep green tones. Calm, trustworthy.",
     bg: "052E16",
     bgAlt: "14532D",
     text: "ECFDF5",
@@ -90,8 +93,98 @@ const THEMES = {
     headingFont: "Palatino",
     bodyFont: "Calibri",
   },
+  noir: {
+    name: "Noir",
+    category: "dark",
+    description: "True black + white. Cinematic, elegant.",
+    bg: "0A0A0A",
+    bgAlt: "171717",
+    text: "E5E5E5",
+    heading: "FFFFFF",
+    accent: "A3A3A3",
+    accent2: "737373",
+    muted: "525252",
+    tableBg: "141414",
+    tableAlt: "1C1C1C",
+    codeBg: "050505",
+    headingFont: "Georgia",
+    bodyFont: "Calibri",
+  },
+  neon: {
+    name: "Neon",
+    category: "dark",
+    description: "Dark with neon cyan accents. Futuristic, tech.",
+    bg: "0C0C1D",
+    bgAlt: "12122B",
+    text: "E0F2FE",
+    heading: "67E8F9",
+    accent: "06B6D4",
+    accent2: "8B5CF6",
+    muted: "5B7B8A",
+    tableBg: "0E0E24",
+    tableAlt: "141430",
+    codeBg: "080818",
+    headingFont: "Arial Black",
+    bodyFont: "Calibri",
+  },
+  ocean: {
+    name: "Ocean",
+    category: "dark",
+    description: "Deep blue to teal. Marine, trustworthy.",
+    bg: "0C4A6E",
+    bgAlt: "155E75",
+    text: "E0F2FE",
+    heading: "BAE6FD",
+    accent: "38BDF8",
+    accent2: "0EA5E9",
+    muted: "7CA8C4",
+    tableBg: "0A3F5F",
+    tableAlt: "0D4D73",
+    codeBg: "082F49",
+    headingFont: "Trebuchet MS",
+    bodyFont: "Calibri",
+  },
+  cherry: {
+    name: "Cherry",
+    category: "dark",
+    description: "Deep cherry red. Bold, confident.",
+    bg: "450A0A",
+    bgAlt: "7F1D1D",
+    text: "FEF2F2",
+    heading: "FECACA",
+    accent: "F87171",
+    accent2: "EF4444",
+    muted: "B07070",
+    tableBg: "3B0808",
+    tableAlt: "4C0E0E",
+    codeBg: "2A0606",
+    headingFont: "Georgia",
+    bodyFont: "Calibri",
+  },
+
+  // ── LIGHT THEMES ───────────────────────────────────────────────
+
+  minimal: {
+    name: "Minimal",
+    category: "light",
+    description: "Clean off-white. Academic, corporate.",
+    bg: "FAFAFA",
+    bgAlt: "F3F4F6",
+    text: "1A1A1A",
+    heading: "111827",
+    accent: "2563EB",
+    accent2: "3B82F6",
+    muted: "6B7280",
+    tableBg: "F9FAFB",
+    tableAlt: "F3F4F6",
+    codeBg: "1F2937",
+    headingFont: "Cambria",
+    bodyFont: "Calibri Light",
+  },
   brutalist: {
     name: "Brutalist",
+    category: "light",
+    description: "Bold yellow + black. Striking, memorable.",
     bg: "FEF08A",
     bgAlt: "FFFFFF",
     text: "000000",
@@ -105,7 +198,150 @@ const THEMES = {
     headingFont: "Impact",
     bodyFont: "Arial",
   },
+  corporate: {
+    name: "Corporate",
+    category: "light",
+    description: "Classic navy on white. Professional, trustworthy.",
+    bg: "FFFFFF",
+    bgAlt: "F8FAFC",
+    text: "334155",
+    heading: "1E293B",
+    accent: "1D4ED8",
+    accent2: "2563EB",
+    muted: "94A3B8",
+    tableBg: "F8FAFC",
+    tableAlt: "F1F5F9",
+    codeBg: "1E293B",
+    headingFont: "Calibri",
+    bodyFont: "Calibri",
+  },
+  rose: {
+    name: "Rosé",
+    category: "light",
+    description: "Soft pink + rose. Modern, elegant.",
+    bg: "FFF1F2",
+    bgAlt: "FFE4E6",
+    text: "4C0519",
+    heading: "881337",
+    accent: "E11D48",
+    accent2: "F43F5E",
+    muted: "9F7080",
+    tableBg: "FFF1F2",
+    tableAlt: "FFE4E6",
+    codeBg: "1C1917",
+    headingFont: "Georgia",
+    bodyFont: "Calibri",
+  },
+  terracotta: {
+    name: "Terracotta",
+    category: "light",
+    description: "Warm earth tones. Organic, crafted.",
+    bg: "FEFCE8",
+    bgAlt: "FEF3C7",
+    text: "451A03",
+    heading: "78350F",
+    accent: "B45309",
+    accent2: "D97706",
+    muted: "92753A",
+    tableBg: "FFFBEB",
+    tableAlt: "FEF3C7",
+    codeBg: "292524",
+    headingFont: "Palatino",
+    bodyFont: "Calibri",
+  },
+  lavender: {
+    name: "Lavender",
+    category: "light",
+    description: "Soft purple tones. Calm, creative.",
+    bg: "FAF5FF",
+    bgAlt: "F3E8FF",
+    text: "3B0764",
+    heading: "581C87",
+    accent: "9333EA",
+    accent2: "A855F7",
+    muted: "8B70A0",
+    tableBg: "FAF5FF",
+    tableAlt: "F3E8FF",
+    codeBg: "1E1B4B",
+    headingFont: "Georgia",
+    bodyFont: "Calibri Light",
+  },
+  paper: {
+    name: "Paper",
+    category: "light",
+    description: "Warm parchment feel. Classic, literary.",
+    bg: "FAF8F5",
+    bgAlt: "F5F0EB",
+    text: "292524",
+    heading: "1C1917",
+    accent: "B45309",
+    accent2: "92400E",
+    muted: "78716C",
+    tableBg: "F5F0EB",
+    tableAlt: "EFEBE5",
+    codeBg: "292524",
+    headingFont: "Palatino",
+    bodyFont: "Calibri",
+  },
+  sage: {
+    name: "Sage",
+    category: "light",
+    description: "Muted green. Calm, balanced, natural.",
+    bg: "F0FDF4",
+    bgAlt: "DCFCE7",
+    text: "14532D",
+    heading: "166534",
+    accent: "16A34A",
+    accent2: "22C55E",
+    muted: "6B8E6B",
+    tableBg: "F0FDF4",
+    tableAlt: "DCFCE7",
+    codeBg: "1A2E1A",
+    headingFont: "Cambria",
+    bodyFont: "Calibri",
+  },
 };
+
+// ─── CUSTOM THEME LOADER ──────────────────────────────────────────
+
+function loadCustomTheme(filePath) {
+  try {
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const custom = JSON.parse(raw);
+
+    // Validate required fields
+    const required = ["bg", "text", "heading", "accent"];
+    for (const field of required) {
+      if (!custom[field]) {
+        console.error(`  ✗ Custom theme missing required field: ${field}`);
+        console.error(`  Required: ${required.join(", ")}`);
+        process.exit(1);
+      }
+    }
+
+    // Fill defaults for optional fields
+    return {
+      name: custom.name || "Custom",
+      category: custom.category || "custom",
+      description: custom.description || "Custom theme",
+      bg: custom.bg,
+      bgAlt: custom.bgAlt || custom.bg,
+      text: custom.text,
+      heading: custom.heading,
+      accent: custom.accent,
+      accent2: custom.accent2 || custom.accent,
+      muted: custom.muted || custom.text,
+      tableBg: custom.tableBg || custom.bgAlt || custom.bg,
+      tableAlt: custom.tableAlt || custom.bg,
+      codeBg: custom.codeBg || "1E293B",
+      headingFont: custom.headingFont || "Calibri",
+      bodyFont: custom.bodyFont || "Calibri",
+    };
+  } catch (err) {
+    console.error(`  ✗ Error loading theme file: ${err.message}`);
+    process.exit(1);
+  }
+}
 
 // ─── MARKDOWN PARSER ───────────────────────────────────────────────
 
@@ -771,8 +1007,8 @@ function buildImageSlide(pres, slide, theme, index, total) {
 
 // ─── MAIN CONVERSION ───────────────────────────────────────────────
 
-async function convert(inputPath, outputPath, themeName) {
-  const theme = THEMES[themeName] || THEMES.midnight;
+async function convert(inputPath, outputPath, themeName, themeObj) {
+  const theme = themeObj || THEMES[themeName] || THEMES.midnight;
   const mdContent = fs.readFileSync(inputPath, "utf-8");
   const slides = parseMarkdown(mdContent);
 
@@ -821,40 +1057,97 @@ async function convert(inputPath, outputPath, themeName) {
 
 const args = process.argv.slice(2);
 
+// --list-themes command
+if (args.includes("--list-themes")) {
+  console.log("\n  SlideDown — Available Themes\n");
+
+  const dark = Object.entries(THEMES).filter(([, t]) => t.category === "dark");
+  const light = Object.entries(THEMES).filter(([, t]) => t.category === "light");
+
+  console.log("  ── Dark Themes ──────────────────────────────────────");
+  for (const [key, t] of dark) {
+    console.log(`    ${key.padEnd(14)} ${t.description}`);
+  }
+  console.log("\n  ── Light Themes ─────────────────────────────────────");
+  for (const [key, t] of light) {
+    console.log(`    ${key.padEnd(14)} ${t.description}`);
+  }
+  console.log("\n  ── Custom Theme ─────────────────────────────────────");
+  console.log("    --theme-file brand.json    Load custom theme from JSON");
+  console.log("    node extract-theme.js company.pptx   Extract from existing PPTX");
+  console.log("");
+  process.exit(0);
+}
+
 if (args.length < 2) {
   console.log(`
   SlideDown — Markdown to Beautiful PPTX
 
-  Usage: node md2pptx.js <input.md> <output.pptx> [theme]
+  Usage:
+    node md2pptx.js <input.md> <output.pptx> [theme]
+    node md2pptx.js <input.md> <output.pptx> --theme-file brand.json
+    node md2pptx.js --list-themes
 
-  Themes:
-    midnight   Dark navy + indigo (default)
-    aurora     Purple-teal gradient
-    sunset     Warm orange-amber
-    minimal    Clean light background
-    forest     Deep green tones
-    brutalist  Bold yellow + black
+  Built-in Themes (16):
+    midnight       Dark navy + indigo (default)
+    aurora         Purple-teal gradient
+    sunset         Warm orange-amber
+    minimal        Clean light background
+    forest         Deep green tones
+    brutalist      Bold yellow + black
+    corporate      Classic navy on white
+    rose           Soft pink + rose
+    ocean          Deep blue to teal
+    terracotta     Warm earth tones
+    lavender       Soft purple tones
+    noir           True black + white
+    neon           Dark with neon cyan
+    paper          Warm parchment feel
+    cherry         Deep cherry red
+    sage           Muted green, calm
 
-  Example:
+  Custom Theme:
+    --theme-file brand.json    Use your own colors/fonts
+
+  Extract from existing PPTX:
+    node extract-theme.js company.pptx > brand.json
+
+  Examples:
     node md2pptx.js talk.md talk.pptx aurora
+    node md2pptx.js talk.md talk.pptx --theme-file brand.json
+    node md2pptx.js --list-themes
 `);
   process.exit(1);
 }
 
-const [inputFile, outputFile, selectedTheme = "midnight"] = args;
+// Parse args — support --theme-file flag
+const inputFile = args[0];
+const outputFile = args[1];
+let theme = null;
+let themeName = "midnight";
+
+const themeFileIdx = args.indexOf("--theme-file");
+if (themeFileIdx !== -1 && args[themeFileIdx + 1]) {
+  const themeFilePath = args[themeFileIdx + 1];
+  theme = loadCustomTheme(themeFilePath);
+  themeName = theme.name;
+} else {
+  const selectedTheme = args[2] || "midnight";
+  if (!THEMES[selectedTheme]) {
+    console.error(`  ✗ Unknown theme: ${selectedTheme}`);
+    console.error(`  Run --list-themes to see available options.`);
+    process.exit(1);
+  }
+  theme = THEMES[selectedTheme];
+  themeName = selectedTheme;
+}
 
 if (!fs.existsSync(inputFile)) {
   console.error(`  ✗ File not found: ${inputFile}`);
   process.exit(1);
 }
 
-if (!THEMES[selectedTheme]) {
-  console.error(`  ✗ Unknown theme: ${selectedTheme}`);
-  console.error(`  Available: ${Object.keys(THEMES).join(", ")}`);
-  process.exit(1);
-}
-
-convert(inputFile, outputFile, selectedTheme).catch((err) => {
+convert(inputFile, outputFile, themeName, theme).catch((err) => {
   console.error("  ✗ Error:", err.message);
   process.exit(1);
 });

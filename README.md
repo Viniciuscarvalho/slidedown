@@ -55,27 +55,87 @@ Double-click the `.pptx` file. It opens in:
 
 ## Themes
 
-Six professionally-designed themes, each with distinct personality:
+16 professionally-designed themes + custom theme support:
+
+### Dark Themes
 
 | Theme | Vibe | Best For |
 |-------|------|----------|
-| **midnight** | Dark navy + indigo | Tech talks, product launches |
+| **midnight** | Navy + indigo | Tech talks, product launches |
 | **aurora** | Purple-teal gradient | Conferences, creative talks |
 | **sunset** | Warm orange-amber | Startups, pitch decks |
-| **minimal** | Clean light background | Academic, corporate |
 | **forest** | Deep green tones | Finance, sustainability |
+| **noir** | True black + white | Cinematic, premium |
+| **neon** | Dark + neon cyan | Futuristic, tech demos |
+| **ocean** | Deep blue to teal | Marine, trustworthy |
+| **cherry** | Deep cherry red | Bold, confident |
+
+### Light Themes
+
+| Theme | Vibe | Best For |
+|-------|------|----------|
+| **minimal** | Clean off-white | Academic, corporate |
 | **brutalist** | Bold yellow + black | Manifestos, bold statements |
+| **corporate** | Navy on white | Professional, enterprise |
+| **rose** | Soft pink + rose | Modern, elegant |
+| **terracotta** | Warm earth tones | Organic, crafted |
+| **lavender** | Soft purple tones | Calm, creative |
+| **paper** | Warm parchment | Classic, literary |
+| **sage** | Muted green | Calm, balanced |
 
 <p align="center">
   <img src="docs/screenshots/theme-midnight.jpg" alt="Midnight" width="280" />
   <img src="docs/screenshots/theme-aurora.jpg" alt="Aurora" width="280" />
-  <img src="docs/screenshots/theme-sunset.jpg" alt="Sunset" width="280" />
+  <img src="docs/screenshots/theme-noir.jpg" alt="Noir" width="280" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/theme-neon.jpg" alt="Neon" width="280" />
+  <img src="docs/screenshots/theme-corporate.jpg" alt="Corporate" width="280" />
+  <img src="docs/screenshots/theme-rose.jpg" alt="Rosé" width="280" />
 </p>
 <p align="center">
   <img src="docs/screenshots/theme-minimal.jpg" alt="Minimal" width="280" />
-  <img src="docs/screenshots/theme-forest.jpg" alt="Forest" width="280" />
+  <img src="docs/screenshots/theme-ocean.jpg" alt="Ocean" width="280" />
   <img src="docs/screenshots/theme-brutalist.jpg" alt="Brutalist" width="280" />
 </p>
+
+### Custom Themes
+
+Bring your own brand! Two ways to use custom themes:
+
+#### Option A: Create a theme JSON manually
+
+```json
+{
+  "name": "My Brand",
+  "bg": "FFFFFF",
+  "text": "2D3748",
+  "heading": "1A202C",
+  "accent": "E53E3E",
+  "headingFont": "Arial Black",
+  "bodyFont": "Arial"
+}
+```
+
+```bash
+node scripts/md2pptx.js talk.md talk.pptx --theme-file brand.json
+```
+
+#### Option B: Extract from an existing PPTX
+
+Already have a company template? Extract its colors and fonts automatically:
+
+```bash
+# Extract theme from any .pptx file
+node scripts/extract-theme.js company-template.pptx -o brand.json -n "Acme Corp"
+
+# Use it with SlideDown
+node scripts/md2pptx.js talk.md talk.pptx --theme-file brand.json
+```
+
+The extractor reads the PPTX's color scheme (dk1, lt1, accent1-6), font pairs, and background — then generates a complete SlideDown theme.
+
+See [`examples/custom-theme.json`](examples/custom-theme.json) for the full format.
 
 ## Markdown Syntax
 
@@ -171,8 +231,18 @@ npm install -g pptxgenjs
 node scripts/md2pptx.js examples/demo.md my-slides.pptx midnight
 
 # Try other themes
-node scripts/md2pptx.js examples/demo.md my-slides.pptx aurora
-node scripts/md2pptx.js examples/demo.md my-slides.pptx sunset
+node scripts/md2pptx.js examples/demo.md my-slides.pptx neon
+node scripts/md2pptx.js examples/demo.md my-slides.pptx rose
+
+# List all available themes
+node scripts/md2pptx.js --list-themes
+
+# Use a custom theme
+node scripts/md2pptx.js examples/demo.md my-slides.pptx --theme-file examples/custom-theme.json
+
+# Extract theme from existing company PPTX
+node scripts/extract-theme.js company-template.pptx -o brand.json -n "My Company"
+node scripts/md2pptx.js examples/demo.md my-slides.pptx --theme-file brand.json
 ```
 
 ## Claude Skill
@@ -204,11 +274,15 @@ slidedown/
 ├── LICENSE                 # MIT License
 ├── package.json            # npm metadata
 ├── scripts/
-│   └── md2pptx.js          # Main converter (Markdown → PPTX)
+│   ├── md2pptx.js          # Main converter (Markdown → PPTX)
+│   └── extract-theme.js    # Extract theme from existing PPTX
 ├── references/
 │   └── themes.md           # Theme color/typography specs
 ├── examples/
-│   └── demo.md             # Sample presentation markdown
+│   ├── demo.md             # Sample presentation
+│   ├── pitch-deck.md       # Pitch deck example
+│   ├── tech-talk.md        # Tech talk example
+│   └── custom-theme.json   # Custom theme example
 └── docs/
     └── screenshots/        # Theme & slide previews
 ```
@@ -224,10 +298,12 @@ slidedown/
 
 ## Roadmap
 
+- [x] 16 built-in themes (dark + light)
+- [x] Custom theme via JSON file
+- [x] Extract theme from existing PPTX
 - [ ] Mermaid diagram support
 - [ ] LaTeX/KaTeX formulas
 - [ ] Two-column split layout (`<!-- layout: split -->`)
-- [ ] Custom CSS per theme
 - [ ] Image auto-download and embedding
 - [ ] Chart generation from table data
 - [ ] CLI npm package (`npx slidedown talk.md`)

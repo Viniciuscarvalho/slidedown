@@ -1,0 +1,19 @@
+{
+  "name": "Acme Corp",
+  "description": "Brand theme for Acme Corporation",
+
+  "bg": "FFFFFF",
+  "bgAlt": "F5F7FA",
+  "text": "2D3748",
+  "heading": "1A202C",
+  "accent": "E53E3E",
+  "accent2": "C53030",
+  "muted": "A0AEC0",
+
+  "tableBg": "F7FAFC",
+  "tableAlt": "EDF2F7",
+  "codeBg": "1A202C",
+
+  "headingFont": "Arial Black",
+  "bodyFont": "Arial"
+}
