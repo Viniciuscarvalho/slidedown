@@ -1,0 +1,43 @@
+{
+  "name": "slidedown",
+  "version": "0.1.0",
+  "description": "Convert Markdown files into beautiful, professionally-designed PPTX presentations. Opens natively in Keynote, PowerPoint, and Google Slides.",
+  "main": "scripts/md2pptx.js",
+  "bin": {
+    "slidedown": "scripts/md2pptx.js"
+  },
+  "scripts": {
+    "convert": "node scripts/md2pptx.js",
+    "demo": "node scripts/md2pptx.js examples/demo.md output.pptx midnight",
+    "demo:all": "for theme in midnight aurora sunset minimal forest brutalist; do node scripts/md2pptx.js examples/demo.md output-$theme.pptx $theme; done"
+  },
+  "keywords": [
+    "markdown",
+    "presentation",
+    "slides",
+    "pptx",
+    "keynote",
+    "powerpoint",
+    "converter",
+    "claude-skill",
+    "developer-tools"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "pptxgenjs": "^3.12.0"
+  },
+  "optionalDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-icons": "^4.0.0",
+    "sharp": "^0.33.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
